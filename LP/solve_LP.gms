@@ -1,6 +1,6 @@
 * --- Solve model --
 *-------------------
-Model m_locateLP /all/;
+
 
 *lim col=0
 *limrow =0
@@ -24,13 +24,12 @@ starttime = jnow;
 * Turn off or on biofuel to only allow consumption changes
 p_noBio =0;
 $ifi %noBio%==1 p_noBio= 1;
-v_y.fx(b_fuel,tech,i)$ p_noBio = 0;
+v_y.fx(b_fuel,i)$ p_noBio = 0;
 p_prodtarget(b_fuel) $ p_noBio =0;
 
 * --- Fix variables with known outcome to avoid varibales in equations
 
 m_locateLP.holdfixed = 1;
-
 
 
 *if ( %holdfixed_var% = 1,
@@ -40,7 +39,7 @@ m_locateLP.holdfixed = 1;
 
 
 $ifi %distConstr%==1 p_distConstraint = 1;
-v_feedstock.fx(f,b_fuel,tech,i,g) $ ((distance(i,g) > 1000) and p_distConstraint)= 0 ;
+v_feedstock.fx(b_fuel,i,g) $ ((distance(i,g) > 1000) and p_distConstraint)= 0 ;
 
 display  v_feedstock.l, v_feedstock.up;
 
@@ -92,7 +91,7 @@ v_redY_cost
 $offtext
 
 execute_unload 'debug_LP.gdx';
-display J.l;
+
 if(execError gt 0,
     display "Tried to load restart values, but got an error.";
    execError = 0;

@@ -16,7 +16,7 @@ starttime = jnow;
 * Turn off or on biofuel to only allow consumption changes
 p_noBio =0;
 $ifi %noBio%==1 p_noBio= 1;
-v_y.fx(b_fuel,tech,i)$ p_noBio = 0;
+v_y.fx(b_fuel,i)$ p_noBio = 0;
 p_prodtarget(b_fuel) $ p_noBio =0;
 
 
@@ -31,12 +31,13 @@ m_locate.holdfixed = 1;
 
 * Constrain if distance between demand and supply regions can be longer than a certain distance
 $ifi %distConstr%==1 p_distConstraint = 1;
-v_feedstock.fx(f,b_fuel,tech,i,g) $ ((distance(i,g) > 1000) and p_distConstraint)= 0 ;
+v_feedstock.fx(b_fuel,i,g) $ ((distance(i,g) > 1000) and p_distConstraint)= 0 ;
 display  v_feedstock.l, v_feedstock.up;
 
 * Dfine max facilities per region, and in total 
 p_max_facilityReg = %maxfacilityReg%;
-p_facility_max(tech) = %facility_max%;
+p_facility_max("high") = %highFacility_max%;
+p_facility_max("low") = %lowFacility_max%;
 
 *p_facility_max(tech) $ [sum(, b_fuel, i), conversion_factor("grass1", b_fuel,i)) and  sum(, b_fuel, i), capacity_constraint_lo, b_fuel,tech,i))] = sum((f,g), feedstock(f,g)) /
 *                                          [sum(, b_fuel,i) $ (conversion_factor("grass1", b_fuel,i) and  capacity_constraint_lo, b_fuel,tech,i)), capacity_constraint_lo, b_fuel,tech,i)/conversion_factor("grass1", b_fuel,i))
@@ -74,6 +75,7 @@ $include start_value_1.gms
 execute_loadpoint '%startValueFile%'
 J
 v_feedstock
+v_feedstock_prod
 v_y_sales
 v_y
 v_transport_cost
@@ -84,7 +86,7 @@ v_tot_demand
 v_tot_feedstock
 
 v_biofuelEmis
-v_biofuelEmis_atI
+v_biofuelEmis_tot
 v_fossil_emissions
 v_totEmissions
 
@@ -111,16 +113,16 @@ if(execError gt 0,
 *           The first solve may be either far off or perfect (if starting values are good)
 *           We give just a little time at this point, because experience shows that
 *           if the solver is restarted from a better point, it is faster.
-            m_locate.Reslim    =  20;
+            m_locate.Reslim    =  (%reslim% ) * 60;
             SOLVE m_locate USING MIP MINIMIZING v_tot_cost;
             if ( EXECERROR > 0, abort "internal error in xxxx");
 *$ontext
 *
 *           Try re-starting solver twice if non-optimal or infeasible
-*            if(  (m_locate.modelstat eq 7) OR (m_locate.modelstat eq 4) OR (m_locate.solvestat eq 3),
-*               m_locate.Reslim    =  60;
-*               SOLVE m_locate USING MIP MINIMIZING v_tot_cost;
-*            );
+            if(  (m_locate.modelstat eq 7) OR (m_locate.modelstat eq 4) OR (m_locate.solvestat eq 3),
+               m_locate.Reslim    =  60;
+               SOLVE m_locate USING MIP MINIMIZING v_tot_cost;
+            );
 
 *           Now we should have a good starting point. Give it some time now.
             if(  (m_locate.modelstat eq 7) OR (m_locate.modelstat eq 4) OR (m_locate.solvestat eq 3),
