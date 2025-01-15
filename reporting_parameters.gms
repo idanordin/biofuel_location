@@ -15,12 +15,12 @@ parameter cost_share(fuels, *,*,cost_items);
 parameter least_cost(f,fuels,tech,i,*);
 parameter highest_cost(f,fuels,tech,i,*);
 parameter unit_cost( fuels,*,*, cost_items);
-parameter distance_feedstock_res(f,fuels,tech,i,g);
-parameter distance_demand_res(fuels,tech,i,h);
-parameter rep_feedstock(f,fuels,tech,knname,g);
+parameter distance_feedstock_res(fuels,i,g);
+parameter distance_demand_res(fuels,i,h);
+parameter rep_feedstock(fuels,knname,g);
 alias (knname, knname2)
-parameter rep_feedstockKnName(f,fuels,tech,knName,knname2);
-parameter rep_feedstock2(f,fuels,tech,i,g,*);
+parameter rep_feedstockKnName(fuels,knName,knname2);
+parameter rep_feedstock2(fuels,i,g,*);
 parameter obj_costs 'costs in the objective function - to check if it works';
 parameter p_ghg(GHGcat,*)'ghg in a facility region i, per category';
 parameter p_LUC(*,g) 'land use changes in ha (?) per abanndoned land categoreis';
